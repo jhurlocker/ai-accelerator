@@ -9,5 +9,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: gp3-csi
+  storageClassName: gp3-csi-immediate
   volumeMode: Filesystem
