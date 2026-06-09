@@ -2,7 +2,6 @@ apiVersion: kubeflow.org/v1
 kind: Notebook
 metadata:
   annotations:
-    kubeflow-resource-stopped: '2026-06-09T09:43:07Z'
     notebooks.opendatahub.io/inject-auth: 'true'
     notebooks.opendatahub.io/last-image-selection: s2i-generic-data-science-notebook:3.4
     opendatahub.io/hardware-profile-name: default-profile
