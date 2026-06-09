@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-cross-tenant
+  namespace: jh-project-shared
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          tenant-network-zone: jh-project
+  podSelector: {}
+  policyTypes:
+  - Ingress

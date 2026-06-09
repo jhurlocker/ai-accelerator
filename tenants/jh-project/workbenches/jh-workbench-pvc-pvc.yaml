@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jh-workbench-pvc
+  namespace: jh-project
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: gp3-csi
+  volumeMode: Filesystem
+  volumeName: pvc-530944ff-8ea8-4d87-9317-ab98f0f0ff2d

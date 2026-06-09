@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    manifestival: new
+  labels:
+    dsp-version: v2
+  name: ds-pipeline-metadata-grpc-pipelines-definition
+  namespace: jh-project
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          pipelines.kubeflow.org/v2_component: 'true'
+    - podSelector:
+        matchLabels:
+          component: data-science-pipelines
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: ds-pipeline-metadata-grpc-pipelines-definition
+      component: data-science-pipelines
+  policyTypes:
+  - Ingress

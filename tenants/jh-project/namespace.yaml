@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    security.openshift.io/MinimallySufficientPodSecurityStandard: baseline
+  labels:
+    kubernetes.io/metadata.name: jh-project
+    opendatahub.io/dashboard: 'true'
+    openshift-pipelines.tekton.dev/namespace-reconcile-version: 1.22.2
+    openshift-pipelines.tekton.dev/namespace-trusted-configmaps-version: 1.22.2
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn-version: latest
+    tenant: jh-project
+    tenant-network-zone: jh-project
+  name: jh-project
+spec:
+  finalizers:
+  - kubernetes

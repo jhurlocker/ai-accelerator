@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- allow-monitoring.yaml
+- allow-rhoai-operator.yaml
+- allow-same-namespace.yaml
+- deny-cross-tenant.yaml
+- ds-pipeline-metadata-grpc-pipelines-definition.yaml
+- ds-pipelines-envoy-pipelines-definition.yaml
+- ds-pipelines-pipelines-definition.yaml
+- jh-workbench-ctrl-np.yaml
+- jh-workbench-kube-rbac-proxy-np.yaml
+- mariadb-pipelines-definition.yaml

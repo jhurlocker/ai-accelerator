@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-tenants
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  generators:
+    - list:
+        elements:
+          - patch-me-see-overlays
+  template:
+    metadata:
+      name: '{{values.name}}'
+      labels:
+        gitops: tenant
+      annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    spec:
+      project: cluster-config
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+          - SkipDryRunOnMissingResource=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 20m
+      source:
+        repoURL: patch-me-see-clusters-overlays
+        targetRevision: patch-me-see-clusters-overlays
+        path: '{{values.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: openshift-gitops

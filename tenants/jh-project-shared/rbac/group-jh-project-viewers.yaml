@@ -1,0 +1,5 @@
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: jh-project-viewers
+users: []

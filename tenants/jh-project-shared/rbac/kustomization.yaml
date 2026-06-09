@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- group-jh-project-admins.yaml
+- group-jh-project-gpu-users.yaml
+- group-jh-project-viewers.yaml
+- group-jh-project-cpu-users.yaml
+- rb-tenant-admins-binding.yaml
+- rb-tenant-cpu-users-binding.yaml
+- rb-tenant-gpu-users-binding.yaml
+- rb-tenant-viewers-binding.yaml

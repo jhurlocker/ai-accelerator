@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-connection-pipeline-s3
+  namespace: jh-project
+  labels:
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/managed: "true"
+  annotations:
+    opendatahub.io/connection-type: s3
+    openshift.io/display-name: "Pipeline S3 (jh-project)"
+stringData:
+  AWS_ACCESS_KEY_ID: "PLACEHOLDER_CHANGE_ME"
+  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_S3_BUCKET: "pipeline-artifacts"
+  AWS_S3_ENDPOINT: "http://s3.jh-project-shared.svc.cluster.local:9000"
+  AWS_SECRET_ACCESS_KEY: "PLACEHOLDER_CHANGE_ME"

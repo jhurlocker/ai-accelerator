@@ -1,0 +1,43 @@
+apiVersion: infrastructure.opendatahub.io/v1
+kind: HardwareProfile
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/tracking-id: openshift-ai-operator:infrastructure.opendatahub.io/HardwareProfile:redhat-ods-applications/nvidia-gpu-serving
+    opendatahub.io/dashboard-feature-visibility: '["model-serving","pipelines"]'
+    opendatahub.io/description: ''
+    opendatahub.io/disabled: 'false'
+    opendatahub.io/display-name: nvidia-gpu
+  name: nvidia-gpu-serving
+  namespace: redhat-ods-applications
+spec:
+  identifiers:
+  - defaultCount: '4'
+    displayName: CPU
+    identifier: cpu
+    maxCount: '32'
+    minCount: '1'
+    resourceType: CPU
+  - defaultCount: 8Gi
+    displayName: Memory
+    identifier: memory
+    maxCount: 120Gi
+    minCount: 2Gi
+    resourceType: Memory
+  - defaultCount: 1
+    displayName: nvidia.com/gpu
+    identifier: nvidia.com/gpu
+    maxCount: 8
+    minCount: 1
+  scheduling:
+    node:
+      tolerations:
+      - effect: NoSchedule
+        key: nvidia-gpu-only
+        operator: Exists
+        value: ''
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        operator: Exists
+        value: ''
+    type: Node

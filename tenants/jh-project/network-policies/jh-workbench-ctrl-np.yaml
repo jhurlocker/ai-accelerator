@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jh-workbench-ctrl-np
+  namespace: jh-project
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: redhat-ods-applications
+    ports:
+    - port: 8888
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      notebook-name: jh-workbench
+  policyTypes:
+  - Ingress
