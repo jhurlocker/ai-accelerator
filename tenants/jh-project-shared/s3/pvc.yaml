@@ -11,4 +11,3 @@ spec:
       storage: 50Gi
   storageClassName: gp3-csi
   volumeMode: Filesystem
-  volumeName: pvc-2c0c90ba-ba5b-4e91-b93e-56e825a60d0f
