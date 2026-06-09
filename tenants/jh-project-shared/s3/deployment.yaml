@@ -30,7 +30,15 @@ spec:
         - --console-address=:9090
         env:
         - name: MINIO_ROOT_USER
-          value: minioadmin
+          valueFrom:
+            secretKeyRef:
+              name: s3-credentials
+              key: MINIO_ROOT_USER
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: s3-credentials
+              key: MINIO_ROOT_PASSWORD
         image: quay.io/minio/minio:latest
         imagePullPolicy: Always
         livenessProbe:
