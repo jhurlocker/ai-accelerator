@@ -1,0 +1,29 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: s3-api
+  labels:
+    app: s3
+spec:
+  to:
+    kind: Service
+    name: s3
+  port:
+    targetPort: 9000
+  tls:
+    termination: edge
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: s3-console
+  labels:
+    app: s3
+spec:
+  to:
+    kind: Service
+    name: s3
+  port:
+    targetPort: 9001
+  tls:
+    termination: edge
