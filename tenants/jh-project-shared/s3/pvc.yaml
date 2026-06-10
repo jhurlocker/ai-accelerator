@@ -11,3 +11,17 @@ spec:
       storage: 50Gi
   storageClassName: gp3-csi
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: s3-logs
+  namespace: jh-project-shared
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: gp3-csi
+  volumeMode: Filesystem

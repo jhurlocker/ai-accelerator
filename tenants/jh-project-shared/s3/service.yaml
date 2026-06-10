@@ -3,12 +3,11 @@ kind: Service
 metadata:
   labels:
     app: s3
+    app.kubernetes.io/name: s3
+    app.kubernetes.io/instance: s3
   name: s3
   namespace: jh-project-shared
 spec:
-  clusterIP: 172.30.185.106
-  clusterIPs:
-  - 172.30.185.106
   internalTrafficPolicy: Cluster
   ipFamilies:
   - IPv4
@@ -19,10 +18,12 @@ spec:
     protocol: TCP
     targetPort: 9000
   - name: console
-    port: 9090
+    port: 9001
     protocol: TCP
-    targetPort: 9090
+    targetPort: 9001
   selector:
     app: s3
+    app.kubernetes.io/name: s3
+    app.kubernetes.io/instance: s3
   sessionAffinity: None
   type: ClusterIP

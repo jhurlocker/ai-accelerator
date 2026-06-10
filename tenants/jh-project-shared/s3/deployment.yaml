@@ -1,46 +1,57 @@
+# Generated from: helm template s3 rustfs/rustfs \
+#   --namespace jh-project-shared \
+#   --set mode.standalone.enabled=true,mode.distributed.enabled=false \
+#   --set ingress.enabled=false,service.type=ClusterIP \
+#   --set secret.existingSecret=s3-credentials \
+#   --set image.rustfs.tag=1.0.0-beta.7 \
+#   --set storageclass.dataStorageSize=50Gi,storageclass.logStorageSize=5Gi \
+#   --set storageclass.name=gp3-csi \
+#   --set resources.limits.cpu=2,resources.limits.memory=4Gi \
+#   --set resources.requests.cpu=500m,resources.requests.memory=512Mi \
+#   --set gatewayApi.enabled=false,nameOverride=s3
+#
+# Apply: oc apply -k .
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: s3
+    app.kubernetes.io/name: s3
+    app.kubernetes.io/instance: s3
   name: s3
   namespace: jh-project-shared
 spec:
-  progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
       app: s3
+      app.kubernetes.io/name: s3
+      app.kubernetes.io/instance: s3
   strategy:
     rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
+      maxSurge: 0
+      maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: s3
+        app.kubernetes.io/name: s3
+        app.kubernetes.io/instance: s3
     spec:
+      serviceAccountName: s3
       containers:
-      - args:
-        - server
-        - /data
-        - --console-address=:9090
-        env:
-        - name: MINIO_ROOT_USER
-          valueFrom:
-            secretKeyRef:
-              name: s3-credentials
-              key: MINIO_ROOT_USER
-        - name: MINIO_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: s3-credentials
-              key: MINIO_ROOT_PASSWORD
-        image: quay.io/minio/minio:latest
-        imagePullPolicy: Always
+      - command:
+        - /usr/bin/rustfs
+        envFrom:
+        - configMapRef:
+            name: s3-config
+        - secretRef:
+            name: s3-credentials
+        image: rustfs/rustfs:1.0.0-beta.7
+        imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -48,27 +59,27 @@ spec:
             port: 9000
             scheme: HTTP
           initialDelaySeconds: 30
-          periodSeconds: 30
+          periodSeconds: 5
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 3
         name: s3
         ports:
         - containerPort: 9000
           name: api
           protocol: TCP
-        - containerPort: 9090
+        - containerPort: 9001
           name: console
           protocol: TCP
         readinessProbe:
-          failureThreshold: 5
+          failureThreshold: 3
           httpGet:
             path: /minio/health/ready
             port: 9000
             scheme: HTTP
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          initialDelaySeconds: 10
+          periodSeconds: 5
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 3
         resources:
           limits:
             cpu: '2'
@@ -76,17 +87,55 @@ spec:
           requests:
             cpu: 500m
             memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data
           name: s3-data
+        - mountPath: /logs
+          name: s3-logs
+          subPath: logs
       dnsPolicy: ClusterFirst
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |
+          mkdir -p /data /mnt/rustfs/logs
+          chmod 755 /mnt/rustfs/logs
+        image: busybox:stable
+        imagePullPolicy: IfNotPresent
+        name: init-step
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /data
+          name: s3-data
+        - mountPath: /mnt/rustfs
+          name: s3-logs
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsUser: 10001
       terminationGracePeriodSeconds: 30
       volumes:
       - name: s3-data
         persistentVolumeClaim:
           claimName: s3-data
+      - name: s3-logs
+        persistentVolumeClaim:
+          claimName: s3-logs
