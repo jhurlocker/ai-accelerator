@@ -1,29 +1,29 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: s3-api
+  name: rustfs-s3
   labels:
-    app: s3
+    app: rustfs
 spec:
   to:
     kind: Service
-    name: s3
+    name: rustfs-s3
   port:
-    targetPort: 9000
+    targetPort: s3
   tls:
     termination: edge
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: s3-console
+  name: rustfs-console
   labels:
-    app: s3
+    app: rustfs
 spec:
   to:
     kind: Service
-    name: s3
+    name: rustfs-console
   port:
-    targetPort: 9001
+    targetPort: console
   tls:
     termination: edge

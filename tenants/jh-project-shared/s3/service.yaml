@@ -2,10 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: s3
-    app.kubernetes.io/name: s3
-    app.kubernetes.io/instance: s3
-  name: s3
+    app: rustfs
+  name: rustfs-s3
   namespace: jh-project-shared
 spec:
   internalTrafficPolicy: Cluster
@@ -13,17 +11,33 @@ spec:
   - IPv4
   ipFamilyPolicy: SingleStack
   ports:
-  - name: api
+  - name: s3
     port: 9000
     protocol: TCP
     targetPort: 9000
+  selector:
+    app: rustfs
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rustfs
+  name: rustfs-console
+  namespace: jh-project-shared
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
   - name: console
     port: 9001
     protocol: TCP
     targetPort: 9001
   selector:
-    app: s3
-    app.kubernetes.io/name: s3
-    app.kubernetes.io/instance: s3
+    app: rustfs
   sessionAffinity: None
   type: ClusterIP

@@ -27,7 +27,7 @@ spec:
     externalStorage:
       basePath: ''
       bucket: pipeline-artifacts
-      host: s3.jh-project-shared.svc.cluster.local
+      host: rustfs-s3.jh-project-shared.svc.cluster.local
       port: '9000'
       region: us-east-1
       s3CredentialsSecret:

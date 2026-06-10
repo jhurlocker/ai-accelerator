@@ -1,14 +1,13 @@
-# Generated from: helm template s3 rustfs/rustfs \
-#   --namespace jh-project-shared \
-#   --set mode.standalone.enabled=true,mode.distributed.enabled=false \
-#   --set ingress.enabled=false,service.type=ClusterIP \
-#   --set secret.existingSecret=s3-credentials \
-#   --set image.rustfs.tag=1.0.0-beta.7 \
-#   --set storageclass.dataStorageSize=50Gi,storageclass.logStorageSize=5Gi \
-#   --set storageclass.name=gp3-csi \
-#   --set resources.limits.cpu=2,resources.limits.memory=4Gi \
-#   --set resources.requests.cpu=500m,resources.requests.memory=512Mi \
-#   --set gatewayApi.enabled=false,nameOverride=s3
+# RUSTFS S3 Object Storage Deployment
+# Reference deployment: oc get deployment rustfs -n rustfs -o yaml
+#
+# Key differences from previous Helm-generated manifests:
+# - Uses `app: rustfs` labels (matching upstream chart default)
+# - Split services: `rustfs-s3` (API) and `rustfs-console` (web UI)
+# - Single PVC: `rustfs-data` (no separate logs PVC)
+# - Image: docker.io/rustfs/rustfs:latest
+# - Security: runAsUser from SA-based UID (SCC managed), not hardcoded
+# - Health probe: /health (native RUSTFS endpoint)
 #
 # Apply: oc apply -k .
 
@@ -16,41 +15,51 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: s3
-    app.kubernetes.io/name: s3
-    app.kubernetes.io/instance: s3
-  name: s3
+    app: rustfs
+  name: rustfs
   namespace: jh-project-shared
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: s3
-      app.kubernetes.io/name: s3
-      app.kubernetes.io/instance: s3
+      app: rustfs
   strategy:
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: s3
-        app.kubernetes.io/name: s3
-        app.kubernetes.io/instance: s3
+        app: rustfs
     spec:
-      serviceAccountName: s3
+      serviceAccountName: rustfs
       containers:
-      - command:
-        - /usr/bin/rustfs
-        envFrom:
-        - configMapRef:
-            name: s3-config
-        - secretRef:
-            name: s3-credentials
-        image: rustfs/rustfs:1.0.0-beta.7
+      - env:
+        - name: RUSTFS_VOLUMES
+          value: /data
+        - name: RUSTFS_ADDRESS
+          value: 0.0.0.0:9000
+        - name: RUSTFS_CONSOLE_ADDRESS
+          value: 0.0.0.0:9001
+        - name: RUSTFS_CONSOLE_ENABLE
+          value: "true"
+        - name: RUSTFS_CORS_ALLOWED_ORIGINS
+          value: '*'
+        - name: RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS
+          value: '*'
+        - name: RUSTFS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: RUSTFS_ACCESS_KEY
+              name: rustfs-credentials
+        - name: RUSTFS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: RUSTFS_SECRET_KEY
+              name: rustfs-credentials
+        image: docker.io/rustfs/rustfs:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -59,13 +68,13 @@ spec:
             port: 9000
             scheme: HTTP
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 3
-        name: s3
+          timeoutSeconds: 1
+        name: rustfs
         ports:
         - containerPort: 9000
-          name: api
+          name: s3
           protocol: TCP
         - containerPort: 9001
           name: console
@@ -77,65 +86,28 @@ spec:
             port: 9000
             scheme: HTTP
           initialDelaySeconds: 10
-          periodSeconds: 5
+          periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 3
-        resources:
-          limits:
-            cpu: '2'
-            memory: 4Gi
-          requests:
-            cpu: 500m
-            memory: 512Mi
+          timeoutSeconds: 1
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
-          readOnlyRootFilesystem: true
           runAsNonRoot: true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data
-          name: s3-data
-        - mountPath: /logs
-          name: s3-logs
-          subPath: logs
+          name: data
       dnsPolicy: ClusterFirst
-      initContainers:
-      - command:
-        - sh
-        - -c
-        - |
-          mkdir -p /data /mnt/rustfs/logs
-          chmod 755 /mnt/rustfs/logs
-        image: busybox:stable
-        imagePullPolicy: IfNotPresent
-        name: init-step
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        volumeMounts:
-        - mountPath: /data
-          name: s3-data
-        - mountPath: /mnt/rustfs
-          name: s3-logs
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext:
-        runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: s3-data
+      - name: data
         persistentVolumeClaim:
-          claimName: s3-data
-      - name: s3-logs
-        persistentVolumeClaim:
-          claimName: s3-logs
+          claimName: rustfs-data
