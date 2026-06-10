@@ -5,3 +5,4 @@ resources:
 - allow-rhoai-operator.yaml
 - allow-same-namespace.yaml
 - deny-cross-tenant.yaml
+- allow-ingress-router.yaml

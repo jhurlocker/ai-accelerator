@@ -5,6 +5,7 @@ resources:
 - allow-rhoai-operator.yaml
 - allow-same-namespace.yaml
 - deny-cross-tenant.yaml
+- allow-ingress-router.yaml
 - ds-pipeline-metadata-grpc-pipelines-definition.yaml
 - ds-pipelines-envoy-pipelines-definition.yaml
 - ds-pipelines-pipelines-definition.yaml

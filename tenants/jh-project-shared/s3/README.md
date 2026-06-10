@@ -70,3 +70,9 @@ The deployment uses the native `/health` endpoint for both liveness and readines
 For external access, use the OpenShift Routes:
 - `rustfs-s3-<namespace>.<cluster-domain>`
 - `rustfs-console-<namespace>.<cluster-domain>`
+
+**NetworkPolicy requirement:** The `allow-ingress-router` NetworkPolicy is required
+for these routes to function. It must allow ingress traffic from pods in the
+`openshift-ingress` namespace (identified by `policy-group.network.openshift.io/ingress=""`
+label). Without it, the ingress router cannot reach the rustfs pods and the routes
+return "Application is not available" even though the backend pods are healthy.
