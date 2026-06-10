@@ -55,7 +55,7 @@ spec:
         livenessProbe:
           failureThreshold: 3
           httpGet:
-            path: /minio/health/live
+            path: /health
             port: 9000
             scheme: HTTP
           initialDelaySeconds: 30
@@ -73,7 +73,7 @@ spec:
         readinessProbe:
           failureThreshold: 3
           httpGet:
-            path: /minio/health/ready
+            path: /health
             port: 9000
             scheme: HTTP
           initialDelaySeconds: 10
